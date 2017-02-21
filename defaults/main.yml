@@ -26,7 +26,7 @@ redis_srv_stor_databases: 16
 redis_srv_stor_rdbCompression: true
 redis_srv_stor_rdbChecksum: true
 redis_srv_stor_stopWritesOnBgSaveError: true
-redis_srv_stor_appendOnly: false
+redis_srv_stor_appendOnly: true
 redis_srv_stor_appendFsync: "everysec"
 redis_srv_stor_noAppendFsyncOnRewrite: "no"
 redis_srv_stor_autoAofRewritePercentage: "100"
@@ -68,9 +68,6 @@ redis_sent_enabled: false
 # Connection
 redis_sent_conn_bind: 0.0.0.0
 redis_sent_conn_port: 26379
-
-# Storage
-redis_sent_stor_dir: "/var/lib/redis"
 
 # Monitors
 redis_sent_monitors:

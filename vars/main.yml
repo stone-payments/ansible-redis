@@ -3,6 +3,9 @@
 # System
 redis_srv_sys_daemonize: false
 redis_srv_sys_pidFile: "/var/run/redis/server.pid"
+redis_srv_sys_confFile: "/etc/redis.conf"
+redis_srv_sys_user: "redis"
+redis_srv_sys_group: "redis"
 
 # Storage
 redis_srv_stor_appendFile: "appendonly.aof"
@@ -18,6 +21,9 @@ redis_srv_log_syslogFacility: ""
 # System
 redis_sent_sys_daemonize: false
 redis_sent_sys_pidFile: "/var/run/redis/sentinel.pid"
+redis_sent_sys_confFile: "/etc/redis-sentinel.conf"
+redis_sent_sys_user: "redis"
+redis_sent_sys_group: "redis"
 
 # Logs
 redis_sent_log_file: "/var/log/redis/sentinel.log"
