@@ -1,27 +1,22 @@
 ---
-- include: check_vars.yml
+- block:
+    - name: install Redis (RedHat)
+      include: install.rpm.yml
+      tags: redis_install
+#   - name: install Redis (Debian)
+#     include: install.deb.yml
+#     tags: redis_install
+#   - name: install Redis (Ubuntu)
+#     include: install.ubu.yml
+#     tags: redis_install
+  when: redis_install_enabled
 
-- include: download.yml
-  tags:
-    - download
+- name: configure Redis server
+  include: server.yml
+  tags: redis_config
+  when: redis_srv_enabled
 
-- include: dependencies.yml
-  tags:
-    - install
-
-- include: install.yml
-  tags:
-    - install
-
-- include: server.yml
-  when: not redis_sentinel
-  tags:
-    - config
-
-- include: sentinel.yml
-  when: redis_sentinel
-  tags:
-    - config
-
-- include: local_facts.yml
-  when: redis_local_facts|bool
+- name: configure Redis sentinel
+  include: sentinel.yml
+  tags: redis_sentinel
+  when: redis_sent_enabled

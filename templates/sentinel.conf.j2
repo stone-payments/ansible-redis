@@ -1,0 +1,32 @@
+# /etc/redis-sentinel.conf
+# {{ ansible_managed }}
+
+# System
+daemonize {{ 'yes' if redis_sent_sys_daemonize else 'no' }}
+pidfile {{ redis_sent_sys_pidFile }}
+
+# Connection
+port {{ redis_sent_conn_port }}
+bind {{ redis_sent_conn_bind }}
+
+# Storage
+dir {{ redis_sent_stor_dir }}
+
+# Log
+logfile {{ redis_sent_log_file }}
+syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}
+{% if redis_sent_log_syslog -%}
+syslog-ident {{ redis_sent_log_syslogIdent }}
+syslog-facility {{ redis_sent_log_syslogFacility }}
+{%- endif %}
+
+# Monitors
+{% for master in redis_sent_monitors -%}
+sentinel monitor {{ master.name }} {{ master.host }} {{ master.port }} {{ master.quorum|d('2') }}
+{% for option in ('auth_pass', 'down_after_milliseconds', 'parallel_syncs', 'failover_timeout', 'notification_script', 'client_reconfig_script') -%}
+{% if master[option] is defined and master[option] -%}
+sentinel {{ option|replace('_', '-') }} {{ master.name }} {{ master[option] }}
+{% endif %}
+{% endfor %}
+
+{% endfor -%}

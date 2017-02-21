@@ -1,87 +1,84 @@
+# /etc/redis.conf
 # {{ ansible_managed }}
 
-# General
-daemonize {{ redis_daemonize }}
-pidfile {{ redis_pidfile }}
-dir {{ redis_dir }}
-port {{ redis_port }}
-bind {{ redis_bind }}
-{% if redis_socket_path -%}
-unixsocket {{ redis_socket_path }}
-unixsocketperm {{ redis_socket_perm }}
-{% endif -%}
-timeout {{ redis_timeout }}
-tcp-keepalive {{ redis_tcp_keepalive }}
-tcp-backlog {{ redis_tcp_backlog }}
-loglevel {{ redis_loglevel }}
-logfile {{ redis_logfile }}
-syslog-enabled {{ redis_syslog_enabled }}
-syslog-ident {{ redis_syslog_ident }}
-syslog-facility {{ redis_syslog_facility }}
-databases {{ redis_databases }}
+# System
+daemonize {{ 'yes' if redis_srv_sys_daemonize else 'no' }}
+pidfile {{ redis_srv_sys_pidFile }}
 
-# Snapshotting
-{% for save in redis_save -%}
+# Connections
+port {{ redis_srv_conn_port }}
+bind {{ redis_srv_conn_bind }}
+{% if redis_srv_conn_socketPath -%}
+unixsocket {{ redis_srv_conn_socketPath }}
+unixsocketperm {{ redis_srv_conn_socketPerm }}
+{% endif -%}
+timeout {{ redis_srv_conn_timeout }}
+tcp-keepalive {{ redis_srv_conn_tcpKeepalive }}
+tcp-backlog {{ redis_srv_conn_tcpBacklog }}
+
+# Storage
+databases {{ redis_srv_stor_databases }}
+dir {{ redis_srv_stor_dir }}
+dbfilename dump.rdb
+{% for save in redis_srv_stor_save -%}
 save {{ save }}
 {% endfor -%}
-stop-writes-on-bgsave-error {{ redis_stop_writes_on_bgsave_error|string }}
-rdbcompression {{ redis_rdbcompression|string }}
-rdbchecksum {{ redis_rdbchecksum|string }}
-dbfilename dump.rdb
-
-# Replication
-{% if redis_slaveof -%}
-slaveof {{ redis_slaveof }}
-{% endif -%}
-slave-serve-stale-data yes
-slave-read-only {{ redis_slave_read_only }}
-repl-disable-tcp-nodelay no
-{% if redis_repl_backlog_size -%}
-repl-backlog-size {{ redis_repl_backlog_size }}
-{% endif -%}
-slave-priority {{ redis_slave_priority }}
-{% if redis_min_slaves_to_write -%}
-min-slaves-to-write {{ redis_min_slaves_to_write }}
-{% endif -%}
-{% if redis_min_slaves_max_lag -%}
-min-slaves-max-lag {{ redis_min_slaves_max_lag }}
-{% endif -%}
-{% if redis_password -%}
-masterauth {{ redis_password }}
-{% endif -%}
+stop-writes-on-bgsave-error {{ 'yes' if redis_srv_stor_stopWritesOnBgSaveError else 'no' }}
+rdbcompression {{ 'yes' if redis_srv_stor_rdbCompression else 'no' }}
+rdbchecksum {{ 'yes' if redis_srv_stor_rdbChecksum else 'no' }}
+appendonly {{ 'yes' if redis_srv_stor_appendOnly else 'no' }}
+appendfilename {{ redis_srv_stor_appendFile }}
+appendfsync {{ redis_srv_stor_appendFsync }}
+no-appendfsync-on-rewrite {{ redis_srv_stor_noAppendFsyncOnRewrite }}
+auto-aof-rewrite-percentage {{ redis_srv_stor_autoAofRewritePercentage }}
+auto-aof-rewrite-min-size {{ redis_srv_stor_autoAofRewriteMinSize }}
 
 # Security
-{% if redis_password -%}
-requirepass {{ redis_password }}
-{% endif -%}
-{% for command in redis_rename_commands -%}
+{% if redis_srv_sec_password -%}
+masterauth {{ redis_srv_sec_password }}
+requirepass {{ redis_srv_sec_password }}
+{% endif %}
+{% for command in redis_srv_sec_renameCommands %}
 rename-command {{ command }}
-{% endfor -%}
+{% endfor %}
+
+# Replication
+{% if not redis_srv_repl_isMaster -%}
+slaveof {{ redis_srv_repl_masterAddr }}
+{% endif %}
+slave-serve-stale-data yes
+slave-read-only {{ 'yes' if redis_srv_repl_slaveReadOnly else 'no' }}
+repl-disable-tcp-nodelay {{ 'yes' if not redis_srv_repl_tcpNodelay else 'no' }}
+{% if redis_srv_repl_backlogSize -%}
+repl-backlog-size {{ redis_srv_repl_backlogSize }}
+{% endif %}
+slave-priority {{ redis_srv_repl_slavePriority }}
+{% if redis_srv_repl_minSlavesToWrite -%}
+min-slaves-to-write {{ redis_srv_repl_minSlavesToWrite }}
+{% endif %}
+{% if redis_srv_repl_minSlavesMaxLag -%}
+min-slaves-max-lag {{ redis_srv_repl_minSlavesMaxLag }}
+{% endif %}
+
+# Log
+logfile {{ redis_srv_log_file }}
+loglevel {{ redis_srv_log_level }}
+syslog-enabled {{ 'yes' if redis_srv_log_syslog else 'no' }}
+{% if redis_srv_log_syslog -%}
+syslog-ident {{ redis_srv_log_syslogIdent }}
+syslog-facility {{ redis_srv_log_syslogFacility }}
+{%- endif %}
+slowlog-log-slower-than {{ redis_srv_log_slowLowerThan }}
+slowlog-max-len {{ redis_srv_log_slowMaxLen }}
+notify-keyspace-events ""
 
 # Limits
-maxclients {{ redis_maxclients }}
-{% if redis_maxmemory -%}
-maxmemory {{ redis_maxmemory }}
-{% endif -%}
-maxmemory-policy {{ redis_maxmemory_policy }}
-
-# Append Only Mode
-appendonly {{ redis_appendonly }}
-appendfilename "{{ redis_appendfilename }}"
-appendfsync {{ redis_appendfsync|string }}
-no-appendfsync-on-rewrite {{ redis_no_appendfsync_on_rewrite }}
-auto-aof-rewrite-percentage {{ redis_auto_aof_rewrite_percentage }}
-auto-aof-rewrite-min-size {{ redis_auto_aof_rewrite_min_size }}
-
-# Lua
+maxclients {{ redis_srv_lim_maxClients }}
+{% if redis_srv_lim_maxMem -%}
+maxmemory {{ redis_srv_lim_maxMem }}
+{%- endif %}
+maxmemory-policy {{ redis_srv_lim_maxMemPol }}
 lua-time-limit 5000
-
-# Slow Log
-slowlog-log-slower-than {{ redis_slowlog_log_slower_than }}
-slowlog-max-len {{ redis_slowlog_max_len }}
-
-# Event Notification
-notify-keyspace-events ""
 
 # Advanced
 hash-max-ziplist-entries 512
