@@ -1,4 +1,11 @@
 ---
+- name: remove example config
+  lineinfile:
+    dest: "{{ redis_sent_sys_confFile }}"
+    state: absent
+    regexp: '^\S*\s*\S*\s*mymaster'
+  notify: restart sentinel
+
 - name: basic sentinel config
   lineinfile:
     dest: "{{ redis_sent_sys_confFile }}"
@@ -22,6 +29,7 @@
       line: "logfile {{ redis_sent_log_file }}"
     - regexp: '^syslog-enabled\s*.*$'
       line: "syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}"
+  notify: restart sentinel
 
 - name: configure masters to monitor
   lineinfile:
@@ -30,6 +38,7 @@
     regexp: "^sentinel monitor {{ item.name }} {{ item.host }}"
     line: "sentinel monitor {{ item.name }} {{ item.host }} {{ item.port }} {{ item.quorum }}"
   with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
 
 - name: configure downtime threshold
   lineinfile:
@@ -38,6 +47,7 @@
     regexp: "^sentinel down-after-milliseconds {{ item.name }}"
     line: "sentinel down-after-milliseconds {{ item.name }} {{ item.down_after_milliseconds }}"
   with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
 
 - name: configure authpass
   lineinfile:
@@ -46,6 +56,12 @@
     regexp: "^sentinel auth-pass {{ item.name }}"
     line: "sentinel auth-pass {{ item.name }} {{ item.auth_pass }}"
   with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
+
+  # Flush handlers before ensuring the service is started to prevent
+# a start and then restart
+- name: flush handlers to apply config changes
+  meta: flush_handlers
 
 - name: ensure sentinel is running and enabled
   service:

@@ -77,7 +77,3 @@ redis_sent_monitors:
     quorum: 2
     auth_pass: ant1r3z
     down_after_milliseconds: 30000
-    parallel_syncs: 1
-    failover_timeout: 180000
-    notification_script: false
-    client_reconfig_script: false
