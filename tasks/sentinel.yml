@@ -26,7 +26,7 @@
     - regexp: '^bind\s*.*$'
       line: "bind {{ redis_sent_conn_bind }}"
     - regexp: '^logfile\s*.*$'
-      line: "logfile {{ redis_sent_log_file }}"
+      line: "logfile \"{{ redis_sent_log_file }}\""
     - regexp: '^syslog-enabled\s*.*$'
       line: "syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}"
   notify: restart sentinel
