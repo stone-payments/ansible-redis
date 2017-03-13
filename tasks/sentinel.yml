@@ -1,4 +1,28 @@
 ---
+- name: configure sentinel-writable folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ redis_sent_sys_user }}"
+    group: "{{ redis_sent_sys_group }}"
+    mode: "0755"
+  with_items:
+    - "{{ redis_sent_stor_dir }}"
+    - "{{ redis_sent_sys_pidFile | dirname }}"
+    - "{{ redis_sent_log_file | dirname }}"
+
+- name: configure sentinel-writable filepaths
+  file:
+    path: "{{ item }}"
+    state: file
+    owner: "{{ redis_sent_sys_user }}"
+    group: "{{ redis_sent_sys_group }}"
+    mode: "0644"
+  with_items:
+    - "{{ redis_sent_sys_pidFile }}"
+    - "{{ redis_sent_log_file }}"
+  failed_when: false
+
 - name: remove example config
   lineinfile:
     dest: "{{ redis_sent_sys_confFile }}"

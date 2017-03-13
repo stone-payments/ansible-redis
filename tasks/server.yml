@@ -7,12 +7,38 @@
     reload: yes
     ignoreerrors: true
 
+- name: configure server-writable folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ redis_srv_sys_user }}"
+    group: "{{ redis_srv_sys_group }}"
+    mode: "0755"
+  with_items:
+    - "{{ redis_srv_stor_dir }}"
+    - "{{ redis_srv_sys_pidFile | dirname }}"
+    - "{{ redis_srv_log_file | dirname }}"
+
+- name: configure server-writable filepaths
+  file:
+    path: "{{ item }}"
+    state: file
+    owner: "{{ redis_srv_sys_user }}"
+    group: "{{ redis_srv_sys_group }}"
+    mode: "0644"
+  with_items:
+    - "{{ redis_srv_stor_dir }}/{{ redis_srv_stor_dbFile }}"
+    - "{{ redis_srv_stor_dir }}/{{ redis_srv_stor_appendFile }}"
+    - "{{ redis_srv_sys_pidFile }}"
+    - "{{ redis_srv_log_file }}"
+  failed_when: false
+
 - name: create redis config file
   template:
     src: redis.conf.j2
     dest: /etc/redis.conf
     owner: redis
-    mode: 0640
+    mode: "0600"
   notify: restart redis
 
 # Flush handlers before ensuring the service is started to prevent

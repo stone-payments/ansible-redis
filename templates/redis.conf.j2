@@ -19,7 +19,7 @@ tcp-backlog {{ redis_srv_conn_tcpBacklog }}
 # Storage
 databases {{ redis_srv_stor_databases }}
 dir {{ redis_srv_stor_dir }}
-dbfilename dump.rdb
+dbfilename {{ redis_srv_stor_dbFile }}
 {% for save in redis_srv_stor_save -%}
 save {{ save }}
 {% endfor -%}

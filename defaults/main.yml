@@ -1,6 +1,7 @@
 ---
 ## Installation options
 redis_install_enabled: true
+redis_install_selinux: true
 
 # Version
 redis_install_ver_major: 2
@@ -64,6 +65,9 @@ redis_srv_lim_maxMemPol: "noeviction"
 
 ## Sentinel options
 redis_sent_enabled: false
+
+# Storage
+redis_sent_stor_dir: "/var/lib/redis"
 
 # Connection
 redis_sent_conn_bind: 0.0.0.0

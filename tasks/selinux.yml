@@ -1,0 +1,52 @@
+---
+- name: configure SELinux file contexts for redis
+  sefcontext:
+    target: "{{ item.target }}"
+    setype: "{{ item.setype }}"
+    reload: true
+    state: present
+  with_items:
+    - target: "{{ redis_srv_sys_bin }}"
+      setype: redis_exec_t
+    - target: "{{ redis_sent_sys_bin }}"
+      setype: redis_exec_t
+    - target: "{{ redis_srv_stor_dir }}(/.*)?"
+      setype: redis_var_lib_t
+    - target: "{{ redis_srv_log_file | dirname }}(/.*)?"
+      setype: redis_log_t
+    - target: "{{ redis_sent_log_file | dirname }}(/.*)?"
+      setype: redis_log_t
+    - target: "{{ redis_srv_sys_pidFile | dirname }}(/.*)?"
+      setype: redis_var_run_t
+    - target: "{{ redis_sent_sys_pidFile | dirname }}(/.*)?"
+      setype: redis_var_run_t
+  notify:
+    - restart redis
+    - restart sentinel
+
+- name: ensure SELinux file context are applied
+  shell: restorecon -vr "{{ item }}"
+  with_items:
+    - "{{ redis_srv_sys_bin }}"
+    - "{{ redis_sent_sys_bin }}"
+    - "{{ redis_srv_stor_dir }}"
+    - "{{ redis_srv_log_file | dirname }}"
+    - "{{ redis_sent_log_file | dirname }}"
+    - "{{ redis_srv_sys_pidFile | dirname }}"
+    - "{{ redis_sent_sys_pidFile | dirname }}"
+  register: restorecon
+  changed_when: restorecon.stdout != ""
+
+- name: configure SELinux network ports for redis
+  seport:
+    ports: "{{ item }}"
+    proto: tcp
+    setype: redis_port_t
+    reload: true
+    state: present
+  with_items:
+    - "{{ redis_srv_conn_port }}"
+    - "{{ redis_sent_conn_port }}"
+  notify:
+    - restart redis
+    - restart sentinel

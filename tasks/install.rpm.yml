@@ -6,3 +6,7 @@
   notify:
     - restart redis
     - restart sentinel
+
+- name: configure SELinux for redis
+  include: selinux.yml
+  when: redis_install_selinux
