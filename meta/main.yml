@@ -1,25 +1,14 @@
 ---
 galaxy_info:
-  author: David Wittman
-  description: Highly configurable role to install Redis and Redis Sentinel from source
-  min_ansible_version: 1.8.0
+  author: Bernardo Donadio
+  description: Role to install a Redis with clustering support
+  min_ansible_version: 2.0.0
   license: MIT
   platforms:
-    - name: Ubuntu
-      versions:
-        - all
-    - name: Debian
-      versions:
-        - all
     - name: EL
       versions:
-        - 6
-    - name: SLES
-      versions:
-        - 11
-        - 12
+        - 7
   categories:
     - database
     - database:nosql
-
 dependencies: []
