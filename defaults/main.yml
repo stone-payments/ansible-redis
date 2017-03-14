@@ -4,8 +4,8 @@ redis_install_enabled: true
 redis_install_selinux: true
 
 # Version
-redis_install_ver_major: 2
-redis_install_ver_minor: 8
+redis_install_ver_major: 3
+redis_install_ver_minor: 2
 redis_install_ver_patch: "*"
 
 
