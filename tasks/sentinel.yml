@@ -59,7 +59,7 @@
   lineinfile:
     dest: "{{ redis_sent_sys_confFile }}"
     state: present
-    regexp: "^sentinel monitor {{ item.name }} {{ item.host }}"
+    regexp: "^sentinel monitor {{ item.name }}"
     line: "sentinel monitor {{ item.name }} {{ item.host }} {{ item.port }} {{ item.quorum }}"
   with_items: "{{ redis_sent_monitors }}"
   notify: restart sentinel
