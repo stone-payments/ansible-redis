@@ -6,6 +6,10 @@
     reload: true
     state: present
   with_items:
+    - target: "{{ redis_srv_sys_confFile }}"
+      setype: redis_conf_t
+    - target: "{{ redis_sent_sys_confFile }}"
+      setype: redis_conf_t
     - target: "{{ redis_srv_sys_bin }}"
       setype: redis_exec_t
     - target: "{{ redis_sent_sys_bin }}"
