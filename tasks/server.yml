@@ -33,6 +33,15 @@
     - "{{ redis_srv_log_file }}"
   failed_when: false
 
+- name: mark file as ansible managed
+  lineinfile:
+    dest: "{{ redis_sent_sys_confFile }}"
+    state: present
+    regexp: "Ansible Managed"
+    insertbefore: BOF
+    line: "# Ansible Managed"
+  register: managed
+
 - name: create redis config file
   template:
     src: redis.conf.j2
@@ -40,6 +49,7 @@
     owner: redis
     mode: "0600"
   notify: restart redis
+  when: managed.changed or redis_reconfig is defined and redis_reconfig
 
 # Flush handlers before ensuring the service is started to prevent
 # a start and then restart
