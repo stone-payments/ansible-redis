@@ -1,4 +1,4 @@
-stone.redis
+stone-payments.redis
 ============
 Role for Ansible which manages Redis in a standalone setup or cluster
 
