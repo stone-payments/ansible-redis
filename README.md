@@ -1,4 +1,4 @@
-buy4.redis
+stone.redis
 ============
 Role for Ansible which manages Redis in a standalone setup or cluster
 
