@@ -17,7 +17,6 @@
   with_items:
     - "{{ redis_srv_stor_dir }}"
     - "{{ redis_srv_sys_pidFile | dirname }}"
-    - "{{ redis_srv_log_file | dirname }}"
 
 - name: configure server-writable filepaths
   file:
@@ -30,8 +29,25 @@
     - "{{ redis_srv_stor_dir }}/{{ redis_srv_stor_dbFile }}"
     - "{{ redis_srv_stor_dir }}/{{ redis_srv_stor_appendFile }}"
     - "{{ redis_srv_sys_pidFile }}"
-    - "{{ redis_srv_log_file }}"
   failed_when: false
+
+- block:
+  - name: configure server log folder
+    file:
+      path: "{{ redis_srv_log_file | dirname }}"
+      state: directory
+      owner: "{{ redis_srv_sys_user }}"
+      group: "{{ redis_srv_sys_group }}"
+      mode: "0755"
+
+  - name: configure server log filepath
+    file:
+      path: "{{ redis_srv_log_file }}"
+      state: file
+      owner: "{{ redis_srv_sys_user }}"
+      group: "{{ redis_srv_sys_group }}"
+      mode: "0644"
+  when: redis_srv_log_file != ""
 
 - name: mark file as ansible managed
   lineinfile:
@@ -50,6 +66,21 @@
     mode: "0600"
   notify: restart redis
   when: managed.changed or redis_reconfig is defined and redis_reconfig
+
+- name: install server service file
+  template:
+    src: "redis.service.j2"
+    dest: "/etc/systemd/system/redis.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart redis
+
+- name: configure SELinux for server
+  include: server_selinux.yml
+  when: ansible_selinux
 
 # Flush handlers before ensuring the service is started to prevent
 # a start and then restart

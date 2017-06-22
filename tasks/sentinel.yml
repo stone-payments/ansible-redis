@@ -9,7 +9,6 @@
   with_items:
     - "{{ redis_sent_stor_dir }}"
     - "{{ redis_sent_sys_pidFile | dirname }}"
-    - "{{ redis_sent_log_file | dirname }}"
 
 - name: configure sentinel-writable filepaths
   file:
@@ -20,8 +19,25 @@
     mode: "0644"
   with_items:
     - "{{ redis_sent_sys_pidFile }}"
-    - "{{ redis_sent_log_file }}"
   failed_when: false
+
+- block:
+  - name: configure sentinel log folder
+    file:
+      path: "{{ redis_sent_log_file | dirname }}"
+      state: directory
+      owner: "{{ redis_sent_sys_user }}"
+      group: "{{ redis_sent_sys_group }}"
+      mode: "0755"
+
+  - name: configure sentinel log filepath
+    file:
+      path: "{{ redis_sent_log_file }}"
+      state: file
+      owner: "{{ redis_sent_sys_user }}"
+      group: "{{ redis_sent_sys_group }}"
+      mode: "0644"
+  when: redis_sent_log_file != ""
 
 - name: remove example config
   lineinfile:
@@ -92,6 +108,21 @@
     with_items: "{{ redis_sent_monitors }}"
     notify: restart sentinel
   when: managed.changed or redis_reconfig is defined and redis_reconfig
+
+- name: install sentinel service file
+  template:
+    src: "redis-sentinel.service.j2"
+    dest: "/etc/systemd/system/redis-sentinel.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart sentinel
+
+- name: configure SELinux for sentinel
+  include: sentinel_selinux.yml
+  when: ansible_selinux
 
 # Flush handlers before ensuring the service is started to prevent
 # a start and then restart

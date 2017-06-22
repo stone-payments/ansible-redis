@@ -52,6 +52,8 @@ redis_srv_repl_minSlavesMaxLag: 10
 redis_srv_repl_backlogSize: false
 
 # Log
+redis_srv_log_file: ""  #leave empty to use journal, or use
+                        #"/var/log/redis/redis.log" as suggestion
 redis_srv_log_level: "notice"
 redis_srv_log_slowLowerThan: 10000
 redis_srv_log_slowMaxLen: 128
@@ -72,6 +74,10 @@ redis_sent_stor_dir: "/var/lib/redis"
 # Connection
 redis_sent_conn_bind: 0.0.0.0
 redis_sent_conn_port: 26379
+
+# Log
+redis_sent_log_file: "" #leave empty to use journal, or use
+                        #"/var/log/redis/sentinel.log" as suggestion
 
 # Monitors
 redis_sent_monitors:

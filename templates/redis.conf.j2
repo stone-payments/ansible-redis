@@ -61,7 +61,7 @@ min-slaves-max-lag {{ redis_srv_repl_minSlavesMaxLag }}
 {% endif %}
 
 # Log
-logfile {{ redis_srv_log_file }}
+logfile "{{ redis_srv_log_file }}"
 loglevel {{ redis_srv_log_level }}
 syslog-enabled {{ 'yes' if redis_srv_log_syslog else 'no' }}
 {% if redis_srv_log_syslog -%}

@@ -13,7 +13,6 @@ redis_srv_stor_dbFile: "dump.rdb"
 redis_srv_stor_appendFile: "appendonly.aof"
 
 # Logs
-redis_srv_log_file: "/var/log/redis/server.log"
 redis_srv_log_syslog: false
 redis_srv_log_syslogIdent: ""
 redis_srv_log_syslogFacility: ""
@@ -29,7 +28,6 @@ redis_sent_sys_user: "redis"
 redis_sent_sys_group: "redis"
 
 # Logs
-redis_sent_log_file: "/var/log/redis/sentinel.log"
 redis_sent_log_syslog: false
 redis_sent_log_syslogIdent: ""
 redis_sent_log_syslogFacility: ""
