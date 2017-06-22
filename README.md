@@ -8,7 +8,7 @@ loopback-only, standalone Redis setup. Just include it in a play:
 ```
 - name: install redis
   hosts: all
-  roles: buy4.redis
+  roles: stone-payments.redis
 ```
 
 # Cluster setup
@@ -18,7 +18,7 @@ the following excerpt:
 ```
 - name: install redis cluster
   host: all
-  roles: buy4.redis
+  roles: stone-payments.redis
   vars:
     redis_srv_conn_bindIp: "0.0.0.0"
     redis_srv_repl_masterAddr: "1.2.3.4"
