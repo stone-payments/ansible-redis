@@ -3,7 +3,7 @@
 
 # System
 daemonize {{ 'yes' if redis_srv_sys_daemonize else 'no' }}
-pidfile {{ redis_srv_sys_pidFile }}
+pidfile "{{ redis_srv_sys_pidFile }}"
 
 # Connections
 port {{ redis_srv_conn_port }}
@@ -18,8 +18,8 @@ tcp-backlog {{ redis_srv_conn_tcpBacklog }}
 
 # Storage
 databases {{ redis_srv_stor_databases }}
-dir {{ redis_srv_stor_dir }}
-dbfilename {{ redis_srv_stor_dbFile }}
+dir "{{ redis_srv_stor_dir }}"
+dbfilename "{{ redis_srv_stor_dbFile }}"
 {% for save in redis_srv_stor_save -%}
 save {{ save }}
 {% endfor -%}
@@ -27,7 +27,7 @@ stop-writes-on-bgsave-error {{ 'yes' if redis_srv_stor_stopWritesOnBgSaveError e
 rdbcompression {{ 'yes' if redis_srv_stor_rdbCompression else 'no' }}
 rdbchecksum {{ 'yes' if redis_srv_stor_rdbChecksum else 'no' }}
 appendonly {{ 'yes' if redis_srv_stor_appendOnly else 'no' }}
-appendfilename {{ redis_srv_stor_appendFile }}
+appendfilename "{{ redis_srv_stor_appendFile }}"
 appendfsync {{ redis_srv_stor_appendFsync }}
 no-appendfsync-on-rewrite {{ redis_srv_stor_noAppendFsyncOnRewrite }}
 auto-aof-rewrite-percentage {{ redis_srv_stor_autoAofRewritePercentage }}
@@ -35,8 +35,8 @@ auto-aof-rewrite-min-size {{ redis_srv_stor_autoAofRewriteMinSize }}
 
 # Security
 {% if redis_srv_sec_password -%}
-masterauth {{ redis_srv_sec_password }}
-requirepass {{ redis_srv_sec_password }}
+masterauth "{{ redis_srv_sec_password }}"
+requirepass "{{ redis_srv_sec_password }}"
 {% endif %}
 {% for command in redis_srv_sec_renameCommands %}
 rename-command {{ command }}
