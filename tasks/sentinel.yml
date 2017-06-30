@@ -46,68 +46,57 @@
     regexp: '^\S*\s*\S*\s*mymaster'
   notify: restart sentinel
 
-- name: mark file as ansible managed
+- name: basic sentinel config
+  lineinfile:
+    dest: "{{ redis_sent_sys_confFile }}"
+    owner: "{{ redis_sent_sys_user }}"
+    group: "{{ redis_sent_sys_group }}"
+    mode: "0600"
+    state: present
+    create: yes
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: '^daemonize\s*.*$'
+      line: "daemonize {{ 'yes' if redis_sent_sys_daemonize else 'no' }}"
+    - regexp: '^pidfile\s*.*$'
+      line: "pidfile \"{{ redis_sent_sys_pidFile }}\""
+    - regexp: '^port\s*.*$'
+      line: "port {{ redis_sent_conn_port }}"
+    - regexp: '^bind\s*.*$'
+      line: "bind {{ redis_sent_conn_bind }}"
+    - regexp: '^logfile\s*.*$'
+      line: "logfile \"{{ redis_sent_log_file }}\""
+    - regexp: '^syslog-enabled\s*.*$'
+      line: "syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}"
+  notify: restart sentinel
+
+- name: configure masters to monitor
   lineinfile:
     dest: "{{ redis_sent_sys_confFile }}"
     state: present
-    regexp: "Ansible Managed"
-    insertbefore: BOF
-    line: "# Ansible Managed"
-  register: managed
+    regexp: "^sentinel monitor {{ item.name }}"
+    line: "sentinel monitor {{ item.name }} {{ item.host }} {{ item.port }} {{ item.quorum }}"
+  with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
 
-- block:
-  - name: basic sentinel config
-    lineinfile:
-      dest: "{{ redis_sent_sys_confFile }}"
-      owner: "{{ redis_sent_sys_user }}"
-      group: "{{ redis_sent_sys_group }}"
-      mode: "0600"
-      state: present
-      create: yes
-      regexp: "{{ item.regexp }}"
-      line: "{{ item.line }}"
-    with_items:
-      - regexp: '^daemonize\s*.*$'
-        line: "daemonize {{ 'yes' if redis_sent_sys_daemonize else 'no' }}"
-      - regexp: '^pidfile\s*.*$'
-        line: "pidfile \"{{ redis_sent_sys_pidFile }}\""
-      - regexp: '^port\s*.*$'
-        line: "port {{ redis_sent_conn_port }}"
-      - regexp: '^bind\s*.*$'
-        line: "bind {{ redis_sent_conn_bind }}"
-      - regexp: '^logfile\s*.*$'
-        line: "logfile \"{{ redis_sent_log_file }}\""
-      - regexp: '^syslog-enabled\s*.*$'
-        line: "syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}"
-    notify: restart sentinel
+- name: configure downtime threshold
+  lineinfile:
+    dest: "{{ redis_sent_sys_confFile }}"
+    state: present
+    regexp: "^sentinel down-after-milliseconds {{ item.name }}"
+    line: "sentinel down-after-milliseconds {{ item.name }} {{ item.down_after_milliseconds }}"
+  with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
 
-  - name: configure masters to monitor
-    lineinfile:
-      dest: "{{ redis_sent_sys_confFile }}"
-      state: present
-      regexp: "^sentinel monitor {{ item.name }}"
-      line: "sentinel monitor {{ item.name }} {{ item.host }} {{ item.port }} {{ item.quorum }}"
-    with_items: "{{ redis_sent_monitors }}"
-    notify: restart sentinel
-
-  - name: configure downtime threshold
-    lineinfile:
-      dest: "{{ redis_sent_sys_confFile }}"
-      state: present
-      regexp: "^sentinel down-after-milliseconds {{ item.name }}"
-      line: "sentinel down-after-milliseconds {{ item.name }} {{ item.down_after_milliseconds }}"
-    with_items: "{{ redis_sent_monitors }}"
-    notify: restart sentinel
-
-  - name: configure authpass
-    lineinfile:
-      dest: "{{ redis_sent_sys_confFile }}"
-      state: present
-      regexp: "^sentinel auth-pass {{ item.name }}"
-      line: "sentinel auth-pass {{ item.name }} {{ item.auth_pass }}"
-    with_items: "{{ redis_sent_monitors }}"
-    notify: restart sentinel
-  when: managed.changed or redis_reconfig is defined and redis_reconfig
+- name: configure authpass
+  lineinfile:
+    dest: "{{ redis_sent_sys_confFile }}"
+    state: present
+    regexp: "^sentinel auth-pass {{ item.name }}"
+    line: "sentinel auth-pass {{ item.name }} {{ item.auth_pass }}"
+  with_items: "{{ redis_sent_monitors }}"
+  notify: restart sentinel
 
 - name: install sentinel service file
   template:
