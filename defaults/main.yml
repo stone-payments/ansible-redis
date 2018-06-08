@@ -87,3 +87,7 @@ redis_sent_monitors:
     quorum: 2
     auth_pass: ant1r3z
     down_after_milliseconds: 30000
+
+# Advanced
+redis_list_max_ziplist_size: -1
+redis_list_compress_depth: 0

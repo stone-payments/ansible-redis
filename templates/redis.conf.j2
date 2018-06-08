@@ -83,6 +83,8 @@ lua-time-limit 5000
 # Advanced
 hash-max-ziplist-entries 512
 hash-max-ziplist-value 64
+list-max-ziplist-size {{ redis_list_max_ziplist_size }}
+list-compress-depth {{ redis_list_compress_depth }}
 list-max-ziplist-entries 512
 list-max-ziplist-value 64
 set-max-intset-entries 512
