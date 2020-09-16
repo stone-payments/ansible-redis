@@ -22,7 +22,7 @@ the following excerpt:
   vars:
     redis_srv_conn_bindIp: "0.0.0.0"
     redis_srv_repl_masterAddr: "1.2.3.4"
-    redis_srv_repl_isMaster: "{{ true if redis_srv_repl_master in ansible_all_ipv4_addresses else false }}"
+    redis_srv_repl_isMaster: "{{ true if redis_srv_repl_masterAddr in ansible_all_ipv4_addresses else false }}"
     redis_sent_enabled: true
     redis_sent_monitors:
       - name: "someMasterName"
