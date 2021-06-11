@@ -1,22 +1,16 @@
 ---
-- block:
-    - name: install Redis (RedHat)
-      include: install.rpm.yml
-      tags: redis_install
-#   - name: install Redis (Debian)
-#     include: install.deb.yml
-#     tags: redis_install
-#   - name: install Redis (Ubuntu)
-#     include: install.ubu.yml
-#     tags: redis_install
+# tasks file for ansible-redis
+- name: install redis
+  include: install_redis.yml
+  tags: redis_install
   when: redis_install_enabled
 
-- name: configure Redis server
-  include: server.yml
-  tags: redis_server
-  when: redis_srv_enabled
+- name: configure redis
+  include: config_redis.yml
+  tags: config_redis
+  when: config_redis_enabled
 
-- name: configure Redis sentinel
-  include: sentinel.yml
-  tags: redis_sentinel
-  when: redis_sent_enabled
+- name: configure newrelic
+  include: config_newrelic.yml
+  tags: config_newrelic
+  when: config_newrelic_enabled

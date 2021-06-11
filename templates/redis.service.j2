@@ -1,19 +1,31 @@
-# /etc/systemd/system/redis.service
-# {{ ansible_managed }}
 [Unit]
-Description=Redis persistent key-value database
-Wants=network.target nohugepages.service
-After=network.target
+Description=Redis data structure server
+Documentation=https://redis.io/documentation
+#Before=your_application.service another_example_application.service
+AssertPathExists=/etc/redis/{{ redis_config_file_name }}
+Wants=network-online.target
+After=network-online.target
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/redis-server /etc/redis.conf --daemonize no
-ExecStop=/usr/bin/redis-shutdown
-User={{ redis_srv_sys_user }}
-Group={{ redis_srv_sys_group }}
-StandardOutput=journal
-StandardError=journal
+ExecStart=/usr/bin/redis-server /etc/redis/{{ redis_config_file_name }} --supervised systemd --daemonize no
+ExecStop=/usr/bin/redis-cli shutdown
+LimitNOFILE={{ redis_nofile_limit }}
+NoNewPrivileges=yes
+#PrivateTmp=yes
+
+Type=notify
+TimeoutStartSec=120
+TimeoutStopSec=120
+UMask=0077
+User={{ redis_user }}
+Group={{ redis_group }}
+WorkingDirectory={{ redis_dir }}
+# Restart=always
+
+# redis-server writes its own config file when in cluster mode so we allow
+# writing there (NB. ProtectSystem=true over ProtectSystem=full)
+# ProtectSystem=true
+# ReadWriteDirectories=-/etc/redis
 
 [Install]
 WantedBy=multi-user.target
-Alias=redis-server.service

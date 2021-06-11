@@ -1,0 +1,9 @@
+---
+- name: create redis nri config file
+  template:
+    src: templates/redis-newrelic.yml.j2
+    dest: /etc/newrelic-infra/integrations.d/redis-config.yml
+    owner: "root"
+    mode: 0640
+  notify: "Restart newrelic-infra"
+

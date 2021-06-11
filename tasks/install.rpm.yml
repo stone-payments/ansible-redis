@@ -1,8 +1,0 @@
----
-- name: install Redis {{ redis_install_ver_major }}.{{ redis_install_ver_minor }}.{{ redis_install_ver_patch }}
-  package:
-    name: redis-{{ redis_install_ver_major }}.{{ redis_install_ver_minor }}.{{ redis_install_ver_patch }}
-    state: present
-  notify:
-    - restart redis
-    - restart sentinel

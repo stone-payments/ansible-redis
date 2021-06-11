@@ -1,0 +1,76 @@
+---
+# begin configuration #
+- name: create redis working directory
+  file:
+    path: "{{ redis_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ redis_user }}"
+- name: create redis systemd service
+  template:
+    src: templates/redis.service.j2
+    dest: /etc/systemd/system/{{ redis_service_name }}.service
+    mode: 0644
+  notify: "Reload systemd"
+# Check then create log dir to prevent aggressively overwriting permissions
+- name: check if log directory exists
+  stat:
+    path: "{{ redis_logfile|dirname }}"
+  register: logdir
+  changed_when: false
+  when: redis_logfile != '""'
+- name: create log directory if it does not exist
+  file:
+    state: directory
+    path: "{{ redis_logfile|dirname }}"
+    owner: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+  when:
+    - redis_logfile != '""'
+    - not logdir.stat.exists
+- name: check if pid directory exists
+  stat:
+    path: "{{ redis_pidfile|dirname }}"
+  register: piddir
+  changed_when: false
+  when:
+    - redis_pidfile is defined
+    - redis_pidfile | string | length > 0
+    - redis_pidfile != '""'
+- name: create pid directory if it does not exist
+  file:
+    state: directory
+    path: "{{ redis_pidfile|dirname }}"
+    owner: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+  when:
+    - redis_pidfile != '""'
+    - not piddir.stat.exists
+- name: create redis config file
+  template:
+    src: templates/redis.conf.j2
+    dest: /etc/redis/{{ redis_config_file_name }}
+    owner: "{{ redis_user }}"
+    mode: 0640
+  notify: "Restart redis"
+- name: ensure that default user is defined
+  lineinfile:
+    path: "/etc/redis/{{ redis_acl_file_name }}"
+    backup: yes
+    regexp: "^user default"
+    line: "user default ~* +@all resetpass on #{{ redis_password | hash('sha256') }}"
+    create: yes
+    owner: "{{ redis_user }}"
+    mode: 0600
+  notify: "Restart redis"
+- name: reload systemd daemon
+  systemd:
+    name: "{{ redis_service_name }}"
+    state: started
+    enabled: yes
+- name: create redis logrotate config file
+  template:
+    src: templates/redis-logrotate.conf.j2
+    dest: /etc/logrotate.d/redis
+    owner: "root"
+    mode: 0640

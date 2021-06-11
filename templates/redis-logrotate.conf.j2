@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+{{ redis_logfile | dirname }}/*.log {
+        {{ redis_logrotate_policy | default('weekly', True) }}
+        rotate {{ redis_logrotate_rotate | default('52', True) }}
+        copytruncate
+        delaycompress
+        compress
+        notifempty
+        missingok
+        dateext
+        minsize 100M
+}
