@@ -9,7 +9,7 @@
     redis_version: 6.2.3
     redis_install_dir: /opt/redis
     redis_dir: "/data/{{ redis_port }}"
-    redis_config_file_name: "{{ redis_service_name }}.conf"
+    redis_config_file_name: "redis.conf"
     redis_download_url: "http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
     redis_reboot_allowed: true
     # Set this to true to validate redis tarball checksum against vars/main.yml
@@ -57,7 +57,7 @@
     # redis_slave_read_only: "yes"
     # redis_slave_priority: 100
     # redis_repl_backlog_size: false
-    redis_newrelic_env: "acquirer-redis-stg"
+    redis_newrelic_env: "{{ lookup('env', 'REDIS_NEWRELIC_ENV') | default(false,True) }}"
     ## Logging
     redis_logfile: "/var/log/redis/{{ redis_service_name }}.log"
     redis_logrotate_policy: weekly
@@ -88,7 +88,7 @@
     # Lua script time limit
     redis_lua_time_limit: 5000
     # the file name for the RDB Backup
-    redis_dbfilename: "dump_{{ redis_port }}.rdb"
+    redis_dbfilename: "dump_{{ redis_service_name }}.rdb"
     # How frequently to snapshot the database to disk
     # e.g. "900 1" => 900 seconds if at least 1 key changed
     redis_save:
