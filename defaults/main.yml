@@ -6,7 +6,7 @@
     config_redis_enabled: true
     config_newrelic_enabled: true
     ## REDIS
-    redis_version: 6.2.3
+    redis_version: "{{ redis_version }}"
     redis_install_dir: /opt/redis
     redis_dir: "/data/{{ redis_port }}"
     redis_config_file_name: "redis.conf"
@@ -37,7 +37,7 @@
     ## Networking/connection options
     redis_bind: false
     redis_port: 6379
-    redis_password: "{{ lookup('env', 'REDIS_PASSWORD') | default(false,True) }}"
+    redis_password: "{{ redis_password }}"
     # Slave replication options
     redis_min_slaves_to_write: 0
     redis_min_slaves_max_lag: 10
