@@ -32,7 +32,7 @@
     # Add local facts to /etc/ansible/facts.d for Redis
     redis_local_facts: false
     # Service name
-    redis_service_name: "redis_{{ redis_port }}"
+    redis_service_name: "redis"
     redis_protected_mode: "yes"
     ## Networking/connection options
     redis_bind: false
