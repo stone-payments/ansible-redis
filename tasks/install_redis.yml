@@ -31,6 +31,10 @@
         system: yes
         group: redis
         create_home: no
+    - name: Create /data directory
+      file:
+        path: /data
+        state: directory
     - name: Set work dir permissions
       file:
         path: /data
