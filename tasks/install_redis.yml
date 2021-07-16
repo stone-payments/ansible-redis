@@ -7,6 +7,10 @@
         option: notify_only
         value: "0"
         no_extra_spaces: yes
+    - name: Remove old versions
+      yum:
+        name: redis
+        state: absent
     - name: upgrade
       yum:
         name: "*"
