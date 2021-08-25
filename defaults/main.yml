@@ -5,6 +5,11 @@
     redis_install_enabled: true
     config_redis_enabled: true
     config_newrelic_enabled: true
+
+    ## Newrelic Integrations
+    nrinfragent_integrations:
+      - { name: nri-redis, state: "latest" }
+
     ## REDIS
     redis_version: "{{ redis_version }}"
     redis_install_dir: /opt/redis
