@@ -10,6 +10,9 @@
     nrinfragent_integrations:
       - { name: nri-redis, state: "latest" }
 
+    ## Newrelic Account
+    newrelic_account: {{ newrelic_account }}
+
     ## REDIS
     redis_version: "{{ redis_version }}"
     redis_install_dir: /opt/redis
