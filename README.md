@@ -19,7 +19,7 @@ Role for Ansible which manages Redis in a standalone setup or cluster
     config_newrelic_enabled: true
     redis_password: "..."
     redis_newrelic_env: "..."
-  
+```
 The role includes extensive configuration options check [`defaults/main.yml`](default/main.yml).
 
 ## Dependencies
@@ -35,7 +35,7 @@ Add the following on your `requirements.yml`:
   src: git+git@github.com:stone-payments/ansible-redis.git
   scm: git
   version: "master" # see the git tags for available versions
-
+```
 
 ## Contributing
 
