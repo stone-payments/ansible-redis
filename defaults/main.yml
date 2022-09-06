@@ -128,6 +128,6 @@
     redis_config_additional: ""
 
     redis_build_dep_packages:
-      [make, gcc, tcl, systemd-devel, openssl-devel, centos-release-scl]
+      [make, gcc, tcl, systemd-devel, openssl-devel, scl-utils]
     redis_sysctl_fixes:
       net.core.somaxconn: 65535
