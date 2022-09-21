@@ -1,9 +1,20 @@
 ---
 # tasks file for ansible-redis
-- name: install redis
-  include: install_redis.yml
+- name: install redis for redhat
+  include: install_redis_redhat.yml
   tags: redis_install
-  when: redis_install_enabled
+  when:
+    - redis_install_enabled
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == '7'
+
+- name: install redis for oraclelinux
+  include: install_redis_oracle.yml
+  tags: redis_install
+  when:
+    - redis_install_enabled
+    - ansible_distribution == 'OracleLinux'
+    - ansible_distribution_major_version == '8'
 
 - name: configure redis
   include: config_redis.yml

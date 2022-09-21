@@ -1,0 +1,120 @@
+---
+- name: block
+  block:
+    - ini_file:
+        path: /etc/yum/pluginconf.d/search-disabled-repos.conf
+        section: main
+        option: notify_only
+        value: "0"
+        no_extra_spaces: yes
+    - name: Remove old versions
+      yum:
+        name: redis
+        state: absent
+    - name: upgrade
+      yum:
+        name: "*"
+        state: latest
+    - name: Install build dependencies packages
+      yum:
+        name: "{{ redis_build_dep_packages }}"
+        state: latest
+        update_cache: yes
+    - name: Install devtoolset to use updated gcc
+      yum:
+        name: gcc-toolset-9
+        update_cache: yes
+        state: latest
+    - name: Add redis group
+      group:
+        name: redis
+        system: yes
+    - name: Add redis user
+      user:
+        name: redis
+        system: yes
+        group: redis
+        create_home: no
+    - name: Create /data directory
+      file:
+        path: /data
+        state: directory
+    - name: Set work dir permissions
+      file:
+        path: /data
+        owner: redis
+        group: redis
+        mode: 1770
+    - name: Set sysctl params
+      sysctl:
+        name: "{{ sysctl.key }}"
+        value: "{{ sysctl.value }}"
+        sysctl_file: /etc/sysctl.d/98-redis.conf
+        sysctl_set: yes
+      loop_control:
+        loop_var: sysctl
+      loop: "{{ redis_sysctl_fixes | default({},true) | dict2items }}"
+    - name: THP in grub default
+      lineinfile:
+        state: present
+        dest: /etc/default/grub
+        backrefs: yes
+        regexp: '^(GRUB_CMDLINE_LINUX=(?!.* transparent_hugepage=\w)\"[^\"]+)(\".*)'
+        line: '\1 transparent_hugepage=madvise\2'
+      notify:
+        - Rebuild grub
+        - Reboot host and wait for it to restart
+    - name: Flush handlers
+      meta: flush_handlers
+    - name: download redis
+      get_url:
+        url: "{{ redis_download_url }}"
+        dest: /usr/local/src/redis-{{ redis_version }}.tar.gz
+        checksum: "{{ redis_checksum|default(omit) }}"
+    - name: extract redis tarball
+      unarchive:
+        src: /usr/local/src/redis-{{ redis_version }}.tar.gz
+        dest: /usr/local/src
+        creates: /usr/local/src/redis-{{ redis_version }}/Makefile
+        copy: no
+      when: not ansible_check_mode
+    - name: compile redis
+      shell: scl enable gcc-toolset-9 -- bash -c "umask 0022 && make -j{{ ansible_processor_cores|default(1) + 1 }}{{ ' 32bit' if redis_make_32bit|bool else '' }}"
+      args:
+        chdir: /usr/local/src/redis-{{ redis_version }}
+        creates: /usr/local/src/redis-{{ redis_version }}/src/redis-server
+      notify: "Make Test Redis"
+    - name: Flush handlers
+      meta: flush_handlers
+    - name: create redis install directory
+      file:
+        path: "{{ redis_install_dir }}"
+        state: directory
+        mode: 0755
+    - name: create /etc/redis
+      file:
+        path: /etc/redis
+        state: directory
+        mode: 0755
+    - name: create /var/run/redis
+      file:
+        path: /var/run/redis
+        state: directory
+        owner: "{{ redis_user }}"
+    - name: install redis
+      shell: umask 0022 && make PREFIX={{ redis_install_dir }} install
+      args:
+        chdir: /usr/local/src/redis-{{ redis_version }}
+        creates: "{{ redis_install_dir }}/bin/redis-server"
+    - name: list redis binaries to add to alternatives
+      command: ls -1 {{ redis_install_dir }}/bin
+      register: redis_binaries
+      changed_when: false
+    - name: add redis binaries to alternatives
+      alternatives:
+        name: "{{ item }}"
+        path: "{{ redis_install_dir }}/bin/{{ item }}"
+        link: "/usr/bin/{{ item }}"
+      with_items: "{{ redis_binaries.stdout_lines }}"
+      when: redis_binaries is succeeded
+    # end install #
