@@ -13,10 +13,10 @@
 
 - name: configure Redis server
   include: server.yml
-  tags: redis_server
+  tags: [redis_server]
   when: redis_srv_enabled
 
 - name: configure Redis sentinel
   include: sentinel.yml
-  tags: redis_sentinel
+  tags: [redis_sentinel]
   when: redis_sent_enabled

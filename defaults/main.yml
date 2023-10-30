@@ -38,12 +38,14 @@ redis_srv_stor_save:
   - 60 10000
 
 # Security
+redis_srv_sec_username: ""
 redis_srv_sec_password: false
 redis_srv_sec_renameCommands: []
 
 # Replication
 redis_srv_repl_isMaster: true
 redis_srv_repl_masterAddr: ""
+redis_srv_repl_masterPort: 6379
 redis_srv_repl_slaveReadOnly: true
 redis_srv_repl_slavePriority: 100
 redis_srv_repl_tcpNodelay: true
@@ -74,6 +76,7 @@ redis_sent_stor_dir: "/var/lib/redis"
 # Connection
 redis_sent_conn_bind: 0.0.0.0
 redis_sent_conn_port: 26379
+redis_sent_default_down_after_ms: 30000
 
 # Log
 redis_sent_log_file: "" #leave empty to use journal, or use
@@ -87,3 +90,5 @@ redis_sent_monitors:
     quorum: 2
     auth_pass: ant1r3z
     down_after_milliseconds: 30000
+
+redis_sent_selinux_service_name: redis-sentinel

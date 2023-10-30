@@ -1,0 +1,10 @@
+module {{ redis_sent_selinux_service_name }} 1.0;
+
+require {
+	type init_t;
+	type redis_exec_t;
+	class lnk_file read;
+}
+
+#============= init_t ==============
+allow init_t redis_exec_t:lnk_file read;
