@@ -39,6 +39,23 @@
         - restart sentinel
   when: redis_sent_log_file != ""
 
+- name: create SELinux policies
+  template:
+    src: selinux-redis-lnkfile-init_t-redis_exec_t.te.j2
+    dest: /tmp/{{ redis_sent_selinux_service_name }}.te
+    owner: root
+    group: root
+    mode: 0644
+
+- name: compile SELinux module
+  command: checkmodule -M -m -o /tmp/{{ redis_sent_selinux_service_name }}.mod /tmp/{{ redis_sent_selinux_service_name }}.te
+
+- name: build SELinux policy package
+  command: semodule_package -o /tmp/{{ redis_sent_selinux_service_name }}.pp -m /tmp/{{ redis_sent_selinux_service_name }}.mod
+
+- name: load SELinux module
+  command: semodule -i /tmp/{{ redis_sent_selinux_service_name }}.pp
+
 - name: configure SELinux network ports for sentinel
   seport:
     ports: "{{ redis_sent_conn_port }}"

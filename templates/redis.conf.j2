@@ -44,7 +44,7 @@ rename-command {{ command }}
 
 # Replication
 {% if not redis_srv_repl_isMaster -%}
-slaveof {{ redis_srv_repl_masterAddr }}
+slaveof {{ redis_srv_repl_masterAddr }} {{ redis_srv_repl_masterPort }}
 {% endif %}
 slave-serve-stale-data yes
 slave-read-only {{ 'yes' if redis_srv_repl_slaveReadOnly else 'no' }}

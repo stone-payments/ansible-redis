@@ -1,0 +1,91 @@
+# /etc/redis-sentinel.conf
+# {{ ansible_managed }}
+
+# By default protected mode is disabled in sentinel mode. Sentinel is reachable
+# from interfaces different than localhost. Make sure the sentinel instance is
+# protected from the outside world via firewalling or other means.
+protected-mode no
+
+# port <sentinel-port>
+# The port that this sentinel instance will run on
+port {{ redis_sent_conn_port }}
+
+# By default Redis Sentinel does not run as a daemon. Use 'yes' if you need it.
+# Note that Redis will write a pid file in /var/run/redis-sentinel.pid when
+# daemonized.
+daemonize {{ 'yes' if redis_sent_sys_daemonize else 'no' }}
+
+# When running daemonized, Redis Sentinel writes a pid file in
+# /var/run/redis-sentinel.pid by default. You can specify a custom pid file
+# location here.
+pidfile {{ redis_sent_sys_pidFile }}
+
+# Specify the server verbosity level.
+# This can be one of:
+# debug (a lot of information, useful for development/testing)
+# verbose (many rarely useful info, but not a mess like the debug level)
+# notice (moderately verbose, what you want in production probably)
+# warning (only very important / critical messages are logged)
+# nothing (nothing is logged)
+loglevel notice
+
+# Specify the log file name. Also the empty string can be used to force
+# Sentinel to log on the standard output. Note that if you use standard
+# output for logging but daemonize, logs will be sent to /dev/null
+{% if redis_sent_log_file %}
+logfile {{ redis_sent_log_file }}
+{% else %}
+logfile ""
+{% endif %}
+
+# To enable logging to the system logger, just set 'syslog-enabled' to yes,
+# and optionally update the other syslog parameters to suit your needs.
+syslog-enabled {{ 'yes' if redis_sent_log_syslog else 'no' }}
+
+# Specify the syslog identity.
+# syslog-ident sentinel
+
+# Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.
+# syslog-facility local0
+
+# sentinel announce-ip <ip>
+# sentinel announce-port <port>
+#
+# The above two configuration directives are useful in environments where,
+# because of NAT, Sentinel is reachable from outside via a non-local address.
+#
+# When announce-ip is provided, the Sentinel will claim the specified IP address
+# in HELLO messages used to gossip its presence, instead of auto-detecting the
+# local address as it usually does.
+#
+# Similarly when announce-port is provided and is valid and non-zero, Sentinel
+# will announce the specified TCP port.
+#
+# The two options don't need to be used together, if only announce-ip is
+# provided, the Sentinel will announce the specified IP and the server port
+# as specified by the "port" option. If only announce-port is provided, the
+# Sentinel will announce the auto-detected local IP and the specified port.
+#
+# Example:
+#
+# sentinel announce-ip 1.2.3.4
+
+# dir <working-directory>
+# Every long running process should have a well-defined working directory.
+# For Redis Sentinel to chdir to /tmp at startup is the simplest thing
+# for the process to don't interfere with administrative tasks such as
+# unmounting filesystems.
+dir /tmp
+
+
+# My Id
+sentinel myid {{ inventory_hostname | hash('sha1') }}
+
+# Monitoring
+{% for mon in redis_sent_monitors %}
+sentinel monitor {{ mon.name }} {{ mon.host }} {{ mon.port }} {{ mon.quorum }}
+sentinel auth-pass {{ mon.name }} {{ mon.auth_pass }}
+sentinel down-after-milliseconds {{ mon.name }} {{ mon.down_after_milliseconds }}
+sentinel failover-timeout {{ mon.name }} 180000
+sentinel parallel-syncs {{ mon.name }} 1
+{% endfor %}

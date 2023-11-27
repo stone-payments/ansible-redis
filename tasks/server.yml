@@ -70,7 +70,7 @@
 
 - name: configure SELinux for server
   include: server_selinux.yml
-  when: ansible_selinux
+  when: redis_install_selinux
 
 # Flush handlers before ensuring the service is started to prevent
 # a start and then restart
